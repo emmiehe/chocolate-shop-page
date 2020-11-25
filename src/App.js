@@ -6,6 +6,11 @@ import {Card, Button} from "@material-ui/core";
 class Product extends React.Component {
   constructor(props){
     super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(event) {
+    this.props.addToCart(event, this.props);
   }
 
   render(){
@@ -19,7 +24,7 @@ class Product extends React.Component {
         <p>Hello I am a piece of delicious chocolate please come and eat me  </p>
         <div className="mdc-card__actions">
           <div className="button-container mdc-card__action-buttons">
-            <Button className="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button">
+            <Button onClick={this.handleClick} className="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button">
               <span className="mdc-button__label">Add to Cart</span>
             </Button>
           </div>
@@ -47,27 +52,14 @@ class CartLine extends React.Component {
 class Cart extends React.Component {
   static initState(){
     return {
-      lines: [
-        {name: "line 1"},
-        {name: "line 2"},
-        {name: "line 3"},
-        {name: "line 4"},
-        {name: "line 5"},
-        {name: "line 6"},
-        {name: "line 7"},
-        {name: "line 8"},
-        {name: "line 9"},
-        {name: "line 10"},
-        {name: "line 11"},
-        {name: "line 12"},
-      ],
+      lines: [],
     };
   }
 
   constructor(props){
     super(props);
-    this.state = Cart.initState();
-    this.handleSubmit = this.handleSubmit.bind(this);
+    // this.state = Cart.initState();
+    // this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleSubmit(event) {
@@ -79,7 +71,7 @@ class Cart extends React.Component {
     return (
       <div className="cart">
         <h4>Hi I'm a cart and this is what I have:</h4>
-        {this.state.lines.map((line) => <CartLine name={line.name}/>)}
+        {this.props.lines.map((line) => <CartLine name={line.name}/>)}
       </div>
     )
   }
@@ -104,16 +96,27 @@ class App extends React.Component {
         {name: "Product K"},
         {name: "Product L"},
       ],
+      cart_lines: [],
     };
+
+    this.addToCart = this.addToCart.bind(this);
   }
+
+  addToCart(event, props) {
+    // alert(name);
+    this.state.cart_lines.push({name: props.name});
+    this.setState({cart_lines: this.state.cart_lines});
+  }
+
+
 
   render() {
     return (
       <div className="main">
         <div className="products">
-          {this.state.products.map((product) => <Product name={product.name}/>)}
+          {this.state.products.map((product) => <Product name={product.name} addToCart={this.addToCart}/>)}
         </div>
-        <Cart addItem={this.addItem}/>
+        <Cart lines={this.state.cart_lines}/>
       </div>
     )
   }

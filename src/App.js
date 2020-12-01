@@ -14,21 +14,24 @@ import milk_2 from "./milk-2.jpg";
 import milk_3 from "./milk-3.jpg";
 import milk_4 from "./milk-4.jpg";
 
-// import {MDCRipple} from "@material-ui/ripple";
-
 var all_products = [
-  {name: "Product A", img: white_1, price: 1.1, color: "White"},
-  {name: "Product B", img: dark_1, price: 2.2, color: "Dark"},
-  {name: "Product C", img: milk_1, price: 3.3, color: "Milk"},
-  {name: "Product D", img: white_2, price: 4.4, color: "White"},
-  {name: "Product E", img: dark_2, price: 5.5, color: "Dark"},
-  {name: "Product F", img: milk_2, price: 6.6, color: "Milk"},
-  {name: "Product G", img: white_3, price: 7.7, color: "White"},
-  {name: "Product H", img: dark_3, price: 8.8, color: "Dark"},
-  {name: "Product I", img: milk_3, price: 9.9, color: "Milk"},
-  {name: "Product J", img: dark_4, price: 10.1, color: "Dark"},
-  {name: "Product K", img: milk_4, price: 11.1, color: "Milk"},
-  {name: "Product L", img: dark_5, price: 12.2, color: "Dark"},
+  {name: "Product A", id: 1, img: white_1, price: 4.4, color: "White", size: "individual"},
+  {name: "Product B", id: 2, img: dark_1, price: 9.9, color: "Dark", size: "party"},
+  {name: "Product C", id: 3, img: milk_1, price: 2.2, color: "Milk", size: "party"},
+  {name: "Product D", id: 4, img: white_2, price: 1.1, color: "White", size: "party"},
+  {name: "Product E", id: 5, img: dark_2, price: 5.5, color: "Dark", size: "individual"},
+  {name: "Product F", id: 6, img: milk_2, price: 6.6, color: "Milk", size: "party"},
+  {name: "Product G", id: 7, img: white_3, price: 7.7, color: "White", size: "twin-pack"},
+  {name: "Product H", id: 8, img: dark_3, price: 8.8, color: "Dark", size: "twin-pack"},
+  {name: "Product I", id: 9, img: milk_3, price: 3.3, color: "Milk", size: "twin-pack"},
+  {name: "Product J", id: 10, img: dark_4, price: 10.1, color: "Dark", size: "individual"},
+  {name: "Product K", id: 11, img: milk_4, price: 11.1, color: "Milk", size: "individual"},
+  {name: "Product L", id: 12, img: dark_5, price: 12.2, color: "Dark", size: "party"},
+];
+
+var all_filters = [
+  {name: "color", options: ["", "White", "Dark", "Milk"], value: ""},
+  {name: "size", options: ["", "individual", "party", "twin-pack"], value: ""},
 ];
 
 class Product extends React.Component {
@@ -52,6 +55,7 @@ class Product extends React.Component {
         <h4>Name: {this.props.name}</h4>
         <h4>Price: {this.props.price}</h4>
         <p>Color: {this.props.color}</p>
+        <p>Size: {this.props.size}</p>
         <p>Hello I am a piece of delicious chocolate please come and eat me  </p>
         <div className="mdc-card__actions">
           <div className="button-container mdc-card__action-buttons">
@@ -61,7 +65,25 @@ class Product extends React.Component {
           </div>
         </div>
       </Card>
+    );
+  }
+}
 
+class Filter extends React.Component {
+  constructor(props){
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(option) {
+    this.props.addToFilters(this.props.name, option);
+  }
+
+  render(){
+    return (
+      <h2 className="uppercase" style={{width: "100%"}}>{this.props.name}
+        {this.props.options.map((option) => <Button onClick={() => this.handleClick(option)}>{option || "All"}</Button>)}
+      </h2>
     );
   }
 }
@@ -100,6 +122,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       products: all_products,
+      filters: all_filters,  // name, options, value
       cart_lines: [],
       total_amount: 0.0,
     };
@@ -107,7 +130,9 @@ class App extends React.Component {
     this.remove = this.remove.bind(this);
     this.increase = this.increase.bind(this);
     this.decrease = this.decrease.bind(this);
-    this.selectColor = this.selectColor.bind(this);
+    this.addToFilters = this.addToFilters.bind(this);
+    this.applyFilters = this.applyFilters.bind(this);
+    this.sortBy = this.sortBy.bind(this);
   }
 
   addToCart(event, props) {
@@ -137,7 +162,6 @@ class App extends React.Component {
       existing_line.total = parseFloat((existing_line.total + props.price).toFixed(2));
       this.setState({cart_lines: this.state.cart_lines, total_amount: parseFloat((this.state.total_amount + props.price).toFixed(2))});
     }
-
   }
 
   decrease(event, props){
@@ -153,11 +177,37 @@ class App extends React.Component {
     }
   }
 
-  selectColor(color) {
-    if (!color){
-     this.setState({products: all_products});
-    }else {
-      this.setState({products: all_products.filter(product => product.color === color)});
+  applyFilters(){
+    let products = all_products;
+    for (let i=0; i< this.state.filters.length; i++){
+      let filterName = this.state.filters[i].name;
+      let filterValue = this.state.filters[i].value;
+      if (filterValue) {
+        console.log(filterValue);
+        products = products.filter(product => product[filterName] === filterValue);
+      }
+    }
+    this.setState({products: products});
+  }
+
+  addToFilters(filterName, option) {
+    let existing_filter = this.state.filters.find(filter => filter.name === filterName);
+    if (existing_filter){
+      existing_filter.value = option;
+    }
+    this.setState({filter: this.state.filters});
+    console.log(this.state.filters);
+    this.applyFilters();
+  }
+
+  sortBy(event){
+    let val = event.target.value;
+    if (val === "select"){
+      this.setState({products: this.state.products.sort((a, b) => a.id - b.id)});
+    } else if (val === "lowToHigh"){
+      this.setState({products: this.state.products.sort((a, b) => a.price - b.price)});
+    } else if (val === "highToLow") {
+      this.setState({products: this.state.products.sort((a, b) => b.price - a.price)});
     }
   }
 
@@ -165,7 +215,7 @@ class App extends React.Component {
     return (
       <div className="main">
         <div className="products">
-          {this.state.products.map((product) => <Product name={product.name} img={product.img} price={product.price} color={product.color} total={product.price} qty={1} addToCart={this.addToCart}/>)}
+          {this.state.products.map((product) => <Product name={product.name} img={product.img} price={product.price} color={product.color} size={product.size} total={product.price} qty={1} addToCart={this.addToCart}/>)}
         </div>
         <div>
           <h4>Total Amount: {this.state.total_amount}</h4>
@@ -173,7 +223,15 @@ class App extends React.Component {
             {this.state.cart_lines.map((line) => <CartLine name={line.name} price={line.price} total={line.total} qty={line.qty} remove={this.remove} increase={this.increase} decrease={this.decrease}/>)}
           </div>
         </div>
-        <h2 style={{width: "100%"}}>Color: <Button onClick={() => this.selectColor("")}>All</Button> <Button onClick={() => this.selectColor("White")}>White</Button> <Button onClick={() => this.selectColor("Dark")}>Dark</Button> <Button onClick={() => this.selectColor("Milk")}>Milk</Button> </h2>
+        <div>
+          {this.state.filters.map((filter) => <Filter name={filter.name} options={filter.options} value={filter.value} addToFilters={this.addToFilters}/>)}
+          <h2>Sort by: </h2>
+          <select name="sortBy" id="sortBy" onChange={this.sortBy}>
+            <option value="select">Select</option>
+            <option value="lowToHigh">Price Low to High</option>
+            <option value="highToLow">Price High to Low</option>
+          </select>
+        </div>
       </div>
     )
   }

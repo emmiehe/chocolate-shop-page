@@ -29,18 +29,9 @@
   color: white;
 }
 
-/*.product {*/
-/*  background-color: #6F73D2;*/
-/*  margin: 2vh;*/
-/*  padding: 2vh;*/
-/*  border-style: outset;*/
-/*}*/
-
-/*.mdc-card__media {*/
-/*  background-image: url("merve-aydin-jD2dIC2IZME-unsplash.jpg");*/
-/*  background-repeat: no-repeat;*/
-/*  height: 30vh;*/
-/*}*/
+.uppercase {
+  text-transform: capitalize;
+}
 
 img {
   max-height: 30vh;
@@ -60,4 +51,3 @@ img {
   align-items: flex-end;
   margin: auto;
 }
-

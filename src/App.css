@@ -2,6 +2,7 @@
   --bg-color: #EEE0B1;
   --section-margin: 2vh;
   --section-padding: 2vh;
+  --border-radius: 15px;
 }
 
 .main {
@@ -31,7 +32,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: 25px;
+  border-radius: var(--border-radius);
 }
 
 .products {
@@ -48,17 +49,16 @@
   justify-content: flex-start;
   font-size: calc(8px + 2vmin);
   color: white;
-  border-radius: 25px;
+  border-radius: var(--border-radius);
 }
 
 .cart {
   background-color: var(--bg-color);
-  border-radius: 25px;
   margin: var(--section-margin);
   padding: var(--section-padding);
+  border-radius: var(--border-radius);
   width: 50vh;
   height: 92vh;
-
   overflow: auto;
   display: flex;
   flex-direction: column;

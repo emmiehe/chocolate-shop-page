@@ -1,6 +1,7 @@
 import React from "react";
 import './App.css';
 import {Card, Button} from "@material-ui/core";
+import {AddCircleOutline, RemoveCircleOutline, DeleteForeverOutlined} from "@material-ui/icons";
 
 // SortByItem is a vanilla javascript object
 // it has two attributes:
@@ -23,17 +24,19 @@ class Product extends React.Component {
             <img src={this.props.img} alt={this.props.description}/>
           </div>
         </div>
-        <p>Name: {this.props.name}</p>
-        <p>Price: {this.props.price}</p>
-        <p>{this.props.description}</p>
-        {/*{this.props.filterable_fields.map(field => <p>{field}: {this.props.filterable_fields[field]}</p>)}*/}
-        <p>Color: {this.props.color}</p>
-        <p>Size: {this.props.size}</p>
-        <div className="mdc-card__actions">
-          <div className="button-container mdc-card__action-buttons">
-            <Button onClick={() => this.props.onAddToCart(this.props)} className="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button">
-              <span className="mdc-button__label">Add to Cart</span>
-            </Button>
+        <div className="card-content">
+          <p>Name: {this.props.name}</p>
+          <p>Price: {this.props.price}</p>
+          <p>{this.props.description}</p>
+          {/* for future generalization, maybe consider this: {this.props.filterable_fields.map(field => <p>{field}: {this.props.filterable_fields[field]}</p>)} */}
+          <p>Color: {this.props.color}</p>
+          <p>Size: {this.props.size}</p>
+          <div className="mdc-card__actions">
+            <div className="button-container mdc-card__action-buttons">
+              <Button variant="contained" color="primary" onClick={() => this.props.onAddToCart(this.props)} className="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button">
+                <span className="mdc-button__label">Add to Cart</span>
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
@@ -41,7 +44,7 @@ class Product extends React.Component {
   }
 }
 
-// Filter value's text color changes according to props
+// FilterValue's text color changes according to props.color
 class FilterValue extends React.Component {
   render(){
     return (
@@ -55,8 +58,7 @@ class Filter extends React.Component {
   render(){
     return (
       <div>
-        <div><h2>{this.props.name}</h2></div>
-        <div>{this.props.options.map((option) => <FilterValue color={option===this.props.value ? "default": "primary"} name={option} selectValue={(selectedValue) => this.props.addToFilters(this.props.name, selectedValue)}/>)}</div>
+        <div><span className="capitalize">{this.props.name}</span>{this.props.options.map((option) => <FilterValue color={option===this.props.value ? "default": "primary"} name={option} selectValue={(selectedValue) => this.props.addToFilters(this.props.name, selectedValue)}/>)}</div>
       </div>
     );
   }
@@ -80,8 +82,7 @@ class SortBy extends React.Component {
   render(){
     return (
       <div>
-        <div><h2>Sort by:</h2></div>
-        <div>
+        <div><span className="capitalize">Sort by</span>
         <select onChange={this.handleSelect}>
           {this.props.sortByItems.map((item, index) => <option value={index}>{item.name}</option>)}
         </select>
@@ -102,7 +103,6 @@ class CartLine extends React.Component {
   handleRemove() {
     this.props.remove(this.props);
   }
-
   handleIncrease() {
     this.props.increase(this.props);
   }
@@ -112,10 +112,47 @@ class CartLine extends React.Component {
 
   render(){
     return (
-      <div>
-        <h5>{this.props.name}  <Button onClick={this.handleDecrease}>-</Button>{this.props.qty}<Button onClick={this.handleIncrease}>+</Button> {this.props.price}/{this.props.total} <Button onClick={this.handleRemove}>Remove</Button></h5>
-      </div>
+        <p className="cart-line">
+          <span>{this.props.name}</span>
+          <RemoveCircleOutline variant="contained" onClick={this.handleDecrease}/>
+          <span> {this.props.qty}</span>
+          <AddCircleOutline onClick={this.handleIncrease}/>
+          <span className="text-right">{this.props.price.toFixed(2)}</span>
+          <span className="text-right">{this.props.total.toFixed(2)}</span>
+          <DeleteForeverOutlined variant="contained" color="secondary" className="button-container" onClick={this.handleRemove}>Remove</DeleteForeverOutlined>
+        </p>
     );
+  }
+}
+
+class Cart extends React.Component {
+  render() {
+    return (
+      <div className="cart">
+        <h2>Cart: </h2>
+        <h4>Total Amount: {this.props.totalAmount.toFixed(2)}</h4>
+          {this.props.totalAmount ?
+            <div>
+              <div className="cart-line">
+            <span>Product Name</span>
+            <span/>
+            <span>Qty</span>
+            <span/>
+            <span className="text-right">Unit Price</span>
+            <span className="text-right">Total</span>
+            <span/>
+          </div>
+            {this.props.cartLines.map((line) => <CartLine key={line.name} name={line.name} price={line.price}
+                                             total={line.total} qty={line.qty} remove={this.props.remove}
+                                             increase={this.props.increase}
+                                             decrease={this.props.decrease}/>)}
+              <Button style={{width: "100%"}} variant="contained" color="primary" onClick={this.props.checkOut}>Check
+                Out</Button>
+            </div>:
+            <div>Your cart is empty.</div>
+          }
+      </div>
+    )
   }
 }
 
@@ -126,8 +163,8 @@ export class App extends React.Component {
     this.state = {
       products: this.props.products,  // id, name, img, description, two attributes, price
       filters: this.props.filters,  // name, options, value
-      cart_lines: [],
-      total_amount: 0.0,
+      cartLines: [],
+      totalAmount: 0.0,
     };
     this.handleAddToCart = this.handleAddToCart.bind(this);
     this.remove = this.remove.bind(this);
@@ -136,46 +173,47 @@ export class App extends React.Component {
     this.addToFilters = this.addToFilters.bind(this);
     this.applyFilters = this.applyFilters.bind(this);
     this.sortBy = this.sortBy.bind(this);
+    this.checkOut = this.checkOut.bind(this);
   }
 
   handleAddToCart(props) {
-    let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
+    let existing_line = this.state.cartLines.find(line => line.name === props.name);
     if (!existing_line){
-      this.state.cart_lines.push({name: props.name, qty: props.qty, price: props.price, total: props.price});
+      this.state.cartLines.push({name: props.name, qty: props.qty, price: props.price, total: props.price});
     } else {
       existing_line.total = parseFloat((existing_line.total + props.price * props.qty).toFixed(2));
       existing_line.qty += props.qty;
     }
 
-    this.setState({cart_lines: this.state.cart_lines, total_amount: parseFloat((this.state.total_amount + props.total).toFixed(2))});
+    this.setState({cartLines: this.state.cartLines, totalAmount: parseFloat((this.state.totalAmount + props.total).toFixed(2))});
   }
 
   remove(props){
-    let existing_line = this.state.cart_lines.find(line => line.name === props.name);
+    let existing_line = this.state.cartLines.find(line => line.name === props.name);
     if (existing_line) {
-      let res_cart_lines = this.state.cart_lines.filter(line => line.name !== props.name);
-      this.setState({cart_lines: res_cart_lines, total_amount: parseFloat((this.state.total_amount - props.total).toFixed(2))});
+      let res_cartLines = this.state.cartLines.filter(line => line.name !== props.name);
+      this.setState({cartLines: res_cartLines, totalAmount: parseFloat((this.state.totalAmount - props.total).toFixed(2))});
     }
   }
 
   increase(props){
-    let existing_line = this.state.cart_lines.find(line => line.name === props.name);
+    let existing_line = this.state.cartLines.find(line => line.name === props.name);
     if (existing_line) {
       existing_line.qty += 1;
       existing_line.total = parseFloat((existing_line.total + props.price).toFixed(2));
-      this.setState({cart_lines: this.state.cart_lines, total_amount: parseFloat((this.state.total_amount + props.price).toFixed(2))});
+      this.setState({cartLines: this.state.cartLines, totalAmount: parseFloat((this.state.totalAmount + props.price).toFixed(2))});
     }
   }
 
   decrease(props){
-    let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
+    let existing_line = this.state.cartLines.find(line => line.name === props.name);
     if (existing_line) {
       existing_line.qty -= 1;
       if (!existing_line.qty){
         this.remove(props);
       }else {
         existing_line.total = parseFloat((existing_line.total - props.price).toFixed(2));
-        this.setState({cart_lines: this.state.cart_lines, total_amount: parseFloat((this.state.total_amount - props.price).toFixed(2))});
+        this.setState({cartLines: this.state.cartLines, totalAmount: parseFloat((this.state.totalAmount - props.price).toFixed(2))});
       }
     }
   }
@@ -205,24 +243,23 @@ export class App extends React.Component {
     this.setState({products: this.state.products.sort(fn)});
   }
 
+  checkOut(){
+    alert("Your cart total is " + this.state.totalAmount.toFixed(2));
+  }
+
   render() {
     return (
       <div className="main">
-        <div className="nav">
-          {this.state.filters.map((filter) => <Filter key={filter.name} name={filter.name} options={filter.options} value={filter.value} addToFilters={this.addToFilters}/>)}
-          {<SortBy sortByItems={this.props.sortByItems} sortBy={this.sortBy}/>}
-        </div>
         <div className="shop">
+          <div className="nav">
+            {this.state.filters.map((filter) => <Filter key={filter.name} name={filter.name} options={filter.options} value={filter.value} addToFilters={this.addToFilters}/>)}
+            {<SortBy sortByItems={this.props.sortByItems} sortBy={this.sortBy}/>}
+          </div>
           <div className="products">
             {this.state.products.map((product) => <Product key={product.id} name={product.name} img={product.img} description={product.description} price={product.price} color={product.color} size={product.size} total={product.price} qty={1} onAddToCart={this.handleAddToCart}/>)}
           </div>
-          <div className="cart">
-            <h4>Total Amount: {this.state.total_amount}</h4>
-            <div>
-              {this.state.cart_lines.map((line) => <CartLine key={line.name} name={line.name} price={line.price} total={line.total} qty={line.qty} remove={this.remove} increase={this.increase} decrease={this.decrease}/>)}
-            </div>
-          </div>
         </div>
+        <Cart cartLines={this.state.cartLines} totalAmount={this.state.totalAmount} remove={this.remove} increase={this.increase} decrease={this.decrease} checkOut={this.checkOut}/>
       </div>
     )
   }

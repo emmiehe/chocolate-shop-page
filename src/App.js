@@ -2,7 +2,9 @@ import React from "react";
 import './App.css';
 import {Card, Button} from "@material-ui/core";
 
-// name, fn
+// SortByItem is a vanilla javascript object
+// it has two attributes:
+// name (name of the sort), fn (sort's compare fn)
 export class SortByItem {
   constructor(name, fn) {
     this.name = name;
@@ -11,9 +13,8 @@ export class SortByItem {
 };
 
 // Individual product
-// Including id, name, img, description, two attributes and a price
+// each product has id (key), img, name, price, description, and a list of filterable attributes (color and size)
 class Product extends React.Component {
-
   render(){
     return (
       <Card className="mdc-card mdc-card--outlined">
@@ -22,14 +23,15 @@ class Product extends React.Component {
             <img src={this.props.img} alt={this.props.description}/>
           </div>
         </div>
-        <h4>Name: {this.props.name}</h4>
-        <h4>Price: {this.props.price}</h4>
+        <p>Name: {this.props.name}</p>
+        <p>Price: {this.props.price}</p>
+        <p>{this.props.description}</p>
+        {/*{this.props.filterable_fields.map(field => <p>{field}: {this.props.filterable_fields[field]}</p>)}*/}
         <p>Color: {this.props.color}</p>
         <p>Size: {this.props.size}</p>
-        <p>{this.props.description}</p>
         <div className="mdc-card__actions">
           <div className="button-container mdc-card__action-buttons">
-            <Button onClick={(event) => this.props.onAddToCart(event, this.props)} className="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button">
+            <Button onClick={() => this.props.onAddToCart(this.props)} className="mdc-button mdc-button--raised mdc-card__action mdc-card__action--button">
               <span className="mdc-button__label">Add to Cart</span>
             </Button>
           </div>
@@ -49,13 +51,12 @@ class FilterValue extends React.Component {
 }
 
 class Filter extends React.Component {
-
   render(){
     return (
-      <h2 className="uppercase" style={{width: "100%"}}>
-        {this.props.name}
-        {this.props.options.map((option) => <FilterValue color={option===this.props.value ? "default": "primary"} name={option} selectValue={(selectedValue) => this.props.addToFilters(this.props.name, selectedValue)}/>)}
-      </h2>
+      <div>
+        <div><h2>{this.props.name}</h2></div>
+        <div>{this.props.options.map((option) => <FilterValue color={option===this.props.value ? "default": "primary"} name={option} selectValue={(selectedValue) => this.props.addToFilters(this.props.name, selectedValue)}/>)}</div>
+      </div>
     );
   }
 }
@@ -75,10 +76,12 @@ class SortBy extends React.Component {
   render(){
     return (
       <div>
-        <span>Sort by: </span>
+        <div><h2>Sort by:</h2></div>
+        <div>
         <select onChange={this.handleSelect}>
           {this.props.sortByItems.map((item, index) => <option value={index}>{item.name}</option>)}
         </select>
+        </div>
       </div>
     );
   }
@@ -92,15 +95,15 @@ class CartLine extends React.Component {
     this.handleDecrease = this.handleDecrease.bind(this);
   }
 
-  handleRemove(event) {
-    this.props.remove(event, this.props);
+  handleRemove() {
+    this.props.remove(this.props);
   }
 
-  handleIncrease(event) {
-    this.props.increase(event, this.props);
+  handleIncrease() {
+    this.props.increase(this.props);
   }
-  handleDecrease(event) {
-    this.props.decrease(event, this.props);
+  handleDecrease() {
+    this.props.decrease(this.props);
   }
 
   render(){
@@ -131,7 +134,7 @@ export class App extends React.Component {
     this.sortBy = this.sortBy.bind(this);
   }
 
-  handleAddToCart(event, props) {
+  handleAddToCart(props) {
     let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
     if (!existing_line){
       this.state.cart_lines.push({name: props.name, qty: props.qty, price: props.price, total: props.price});
@@ -143,7 +146,7 @@ export class App extends React.Component {
     this.setState({cart_lines: this.state.cart_lines, total_amount: parseFloat((this.state.total_amount + props.total).toFixed(2))});
   }
 
-  remove(event, props){
+  remove(props){
     let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
     if (existing_line) {
       let res_cart_lines = this.state.cart_lines.filter(line => line.name !== props.name);
@@ -151,7 +154,7 @@ export class App extends React.Component {
     }
   }
 
-  increase(event, props){
+  increase(props){
     let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
     if (existing_line) {
       existing_line.qty += 1;
@@ -160,12 +163,12 @@ export class App extends React.Component {
     }
   }
 
-  decrease(event, props){
+  decrease(props){
     let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
     if (existing_line) {
       existing_line.qty -= 1;
       if (!existing_line.qty){
-        this.remove(event, props);
+        this.remove(props);
       }else {
         existing_line.total = parseFloat((existing_line.total - props.price).toFixed(2));
         this.setState({cart_lines: this.state.cart_lines, total_amount: parseFloat((this.state.total_amount - props.price).toFixed(2))});
@@ -201,18 +204,20 @@ export class App extends React.Component {
   render() {
     return (
       <div className="main">
-        <div className="products">
-          {this.state.products.map((product) => <Product key={product.id} name={product.name} img={product.img} description={product.description} price={product.price} color={product.color} size={product.size} total={product.price} qty={1} onAddToCart={this.handleAddToCart}/>)}
-        </div>
-        <div>
-          <h4>Total Amount: {this.state.total_amount}</h4>
-          <div className="cart">
-            {this.state.cart_lines.map((line) => <CartLine key={line.name} name={line.name} price={line.price} total={line.total} qty={line.qty} remove={this.remove} increase={this.increase} decrease={this.decrease}/>)}
-          </div>
-        </div>
-        <div>
+        <div className="nav">
           {this.state.filters.map((filter) => <Filter key={filter.name} name={filter.name} options={filter.options} value={filter.value} addToFilters={this.addToFilters}/>)}
           {<SortBy sortByItems={this.props.sortByItems} sortBy={this.sortBy}/>}
+        </div>
+        <div className="shop">
+          <div className="products">
+            {this.state.products.map((product) => <Product key={product.id} name={product.name} img={product.img} description={product.description} price={product.price} color={product.color} size={product.size} total={product.price} qty={1} onAddToCart={this.handleAddToCart}/>)}
+          </div>
+          <div className="cart">
+            <h4>Total Amount: {this.state.total_amount}</h4>
+            <div>
+              {this.state.cart_lines.map((line) => <CartLine key={line.name} name={line.name} price={line.price} total={line.total} qty={line.qty} remove={this.remove} increase={this.increase} decrease={this.decrease}/>)}
+            </div>
+          </div>
         </div>
       </div>
     )

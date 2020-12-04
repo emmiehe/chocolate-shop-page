@@ -41,7 +41,7 @@ class Product extends React.Component {
   }
 }
 
-// name
+// Filter value's text color changes according to props
 class FilterValue extends React.Component {
   render(){
     return (
@@ -50,6 +50,7 @@ class FilterValue extends React.Component {
   }
 }
 
+// Filter's parent will tell Filter's child (FilterValue) whether the FilterValue is a selected value or not
 class Filter extends React.Component {
   render(){
     return (
@@ -61,13 +62,16 @@ class Filter extends React.Component {
   }
 }
 
-// [<SortByItem> item1, ...]
+// SortBy holds a list of SortByItems: [<SortByItem> item1, ...]
 class SortBy extends React.Component {
   constructor(props){
     super(props);
     this.handleSelect = this.handleSelect.bind(this);
   }
 
+  // When a sortBy is selected, it will call parent's sortBy
+  // along with a corresponding sort function fn
+  // Note that SortByItem has name and fn attributes
   handleSelect(event) {
     let fn = this.props.sortByItems[parseInt(event.target.value)].fn;
     this.props.sortBy(fn);
@@ -147,7 +151,7 @@ export class App extends React.Component {
   }
 
   remove(props){
-    let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
+    let existing_line = this.state.cart_lines.find(line => line.name === props.name);
     if (existing_line) {
       let res_cart_lines = this.state.cart_lines.filter(line => line.name !== props.name);
       this.setState({cart_lines: res_cart_lines, total_amount: parseFloat((this.state.total_amount - props.total).toFixed(2))});
@@ -155,7 +159,7 @@ export class App extends React.Component {
   }
 
   increase(props){
-    let existing_line = this.state.cart_lines.find(line => line.name === props.name); // perhaps using key is better
+    let existing_line = this.state.cart_lines.find(line => line.name === props.name);
     if (existing_line) {
       existing_line.qty += 1;
       existing_line.total = parseFloat((existing_line.total + props.price).toFixed(2));

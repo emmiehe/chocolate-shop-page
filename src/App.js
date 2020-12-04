@@ -13,16 +13,13 @@ export class SortByItem {
 // Individual product
 // Including id, name, img, description, two attributes and a price
 class Product extends React.Component {
-  constructor(props){
-    super(props);
-  }
 
   render(){
     return (
       <Card className="mdc-card mdc-card--outlined">
         <div className="mdc-card__primary-action">
           <div className="mdc-card__media mdc-card__media--square">
-            <img src={this.props.img}/>
+            <img src={this.props.img} alt={this.props.description}/>
           </div>
         </div>
         <h4>Name: {this.props.name}</h4>
@@ -42,15 +39,22 @@ class Product extends React.Component {
   }
 }
 
-class Filter extends React.Component {
-  constructor(props){
-    super(props);
+// name
+class FilterValue extends React.Component {
+  render(){
+    return (
+      <Button color={this.props.color} onClick={() => this.props.selectValue(this.props.name)}>{this.props.name || "All"}</Button>
+    );
   }
+}
+
+class Filter extends React.Component {
 
   render(){
     return (
-      <h2 className="uppercase" style={{width: "100%"}}>{this.props.name}
-        {this.props.options.map((option) => <Button onClick={() => this.props.addToFilters(this.props.name, option)}>{option || "All"}</Button>)}
+      <h2 className="uppercase" style={{width: "100%"}}>
+        {this.props.name}
+        {this.props.options.map((option) => <FilterValue color={option===this.props.value ? "default": "primary"} name={option} selectValue={(selectedValue) => this.props.addToFilters(this.props.name, selectedValue)}/>)}
       </h2>
     );
   }
@@ -171,11 +175,10 @@ export class App extends React.Component {
 
   applyFilters(){
     let products = this.props.products;
-    for (let i=0; i< this.state.filters.length; i++){
+    for (let i=0; i<this.state.filters.length; i++){
       let filterName = this.state.filters[i].name;
       let filterValue = this.state.filters[i].value;
       if (filterValue) {
-        // console.log(filterValue);
         products = products.filter(product => product[filterName] === filterValue);
       }
     }
@@ -188,7 +191,6 @@ export class App extends React.Component {
       existing_filter.value = option;
     }
     this.setState({filter: this.state.filters});
-    // console.log(this.state.filters);
     this.applyFilters();
   }
 

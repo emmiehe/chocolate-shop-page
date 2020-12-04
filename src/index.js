@@ -16,7 +16,7 @@ import milk_2 from "./milk-2.jpg";
 import milk_3 from "./milk-3.jpg";
 import milk_4 from "./milk-4.jpg";
 
-var dataProducts = [
+const dataProducts = [
   {name: "Product A", id: 1, img: white_1, price: 4.4, color: "White", size: "individual", description: "Hello I am a piece of delicious chocolate please come and eat me!"},
   {name: "Product B", id: 2, img: dark_1, price: 9.9, color: "Dark", size: "party", description: "Hello I am a piece of delicious chocolate please come and eat me!"},
   {name: "Product C", id: 3, img: milk_1, price: 2.2, color: "Milk", size: "party", description: "Hello I am a piece of delicious chocolate please come and eat me!"},
@@ -31,12 +31,12 @@ var dataProducts = [
   {name: "Product L", id: 12, img: dark_5, price: 12.2, color: "Dark", size: "party", description: "Hello I am a piece of delicious chocolate please come and eat me!"},
 ];
 
-var dataFilters = [
+const dataFilters = [
   {name: "color", options: ["", "White", "Dark", "Milk"], value: ""},
   {name: "size", options: ["", "individual", "party", "twin-pack"], value: ""},
 ];
 
-var dataSortByItems = [
+const dataSortByItems = [
   new SortByItem("Select", (a, b) => a.id - b.id),
   new SortByItem("Price Low to High", (a, b) => a.price - b.price),
   new SortByItem("Price High to Low", (a, b) => b.price - a.price),

@@ -23,6 +23,7 @@
     * filters (initially given by the props, all selected values should be """)
     * cartLines (initially empty)
     * totalAmount (initially 0.0)
+    * sortByFn (default sortBy function)
 
 ### How user interactions can trigger changes in the state of components
 * User presses a FilterValue:

@@ -165,6 +165,7 @@ export class App extends React.Component {
       filters: this.props.filters,  // name, options, value
       cartLines: [],
       totalAmount: 0.0,
+      sortByFn: this.props.sortByItems[0].fn, // this is the default sortByFn
     };
     this.handleAddToCart = this.handleAddToCart.bind(this);
     this.remove = this.remove.bind(this);
@@ -218,6 +219,10 @@ export class App extends React.Component {
     }
   }
 
+  sortBy(fn){
+    this.setState({sortByFn: fn, products: this.state.products.sort(fn)});
+  }
+
   applyFilters(){
     let products = this.props.products;
     for (let i=0; i<this.state.filters.length; i++){
@@ -227,7 +232,8 @@ export class App extends React.Component {
         products = products.filter(product => product[filterName] === filterValue);
       }
     }
-    this.setState({products: products});
+    this.setState({products: products.sort(this.state.sortByFn)});
+    // this.sortBy(this.state.sortByFn);
   }
 
   addToFilters(filterName, option) {
@@ -239,9 +245,7 @@ export class App extends React.Component {
     this.applyFilters();
   }
 
-  sortBy(fn){
-    this.setState({products: this.state.products.sort(fn)});
-  }
+
 
   checkOut(){
     alert("Your cart total is " + this.state.totalAmount.toFixed(2));

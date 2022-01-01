@@ -1,5 +1,6 @@
 # React Shopping Cart Page
 * [Chocolate Shop](https://secure-tor-00222.herokuapp.com/) is an example of a list and aggregator interface in React.
+* ![demo](demo.png)
 
 ## Application Architecture: 
 
